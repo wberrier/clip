@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import commands
+
+# walk up tree to find a "build" directory
+
+common_build_dir = "build"
+
+(code, output) = commands.getstatusoutput("get_dist")
+arch_build_dir = "build-" + output
+
+def getBuildDir():
+    curdir = os.getcwd()
+    while curdir != "/":
+
+        test_dir = curdir + "/" + arch_build_dir
+        if os.path.exists(test_dir):
+            return test_dir
+
+        test_dir = curdir + "/" + common_build_dir
+        if os.path.exists(test_dir):
+            return test_dir
+
+        curdir = os.path.dirname(curdir)
+
+def getProcCount():
+    """ Get number of processors + 1"""
+    if os.environ.has_key('MAKE_NUM_PROCESSORS'):
+        return int(os.environ['MAKE_NUM_PROCESSORS'])
+
+    count = 1
+    for line in open("/proc/cpuinfo").readlines():
+        if line.startswith("processor"):
+            count += 1
+
+    return count
+
+full_build_dir = getBuildDir()
+
+num_procs = getProcCount()
+#num_procs = 1
+
+os.chdir(full_build_dir)
+os.system(("make -j%d" % num_procs) + " ".join(sys.argv[1:]))
