@@ -4,14 +4,26 @@ import os
 import re
 import sys
 import commands
+import getopt
 
 import pdb
 
+# Command line parsing
+build_dir = "build"
+
+opts, remaining_args = getopt.gnu_getopt(sys.argv[1:], "", [ "build_dir=" ])
+for option, value in opts:
+    if option == "--build_dir":
+        build_dir= value
+
+# Allow build directories like this: el6-x86_64
 (code, dist) = commands.getstatusoutput("get_dist")
 
 # Try these in order
-# TODO: handle debug builds via command line parameter?
-build_dirs = ["build-" + dist, "build-cross-" + dist, "build", "build-cross"]
+build_dirs = [
+    build_dir + "-" + dist,
+    build_dir,
+]
 
 def getBuildDir():
     # walk up tree to find a "build" directory
@@ -29,7 +41,13 @@ def getBuildDir():
 def getBuildTool(build_dir):
     # with cmake 2.8, you can just call "cmake --build <dir>"
     # but with 2.6, we have to inspect CMakeCache.txt
-    cache = open(build_dir + "/CMakeCache.txt").read()
+    cache_filename = build_dir + "/CMakeCache.txt"
+
+    if not os.path.exists(cache_filename):
+        print "Unable to find build dir"
+        sys.exit(1)
+
+    cache = open(cache_filename).read()
 
     for line in cache.split("\n"):
         matches = re.search("^CMAKE_MAKE_PROGRAM.*=(.*)", line)
@@ -61,5 +79,4 @@ build_tool = getBuildTool(full_build_dir)
 num_procs = getProcCount()
 #num_procs = 1
 
-os.chdir(full_build_dir)
-os.system(("%s -j%d" % (build_tool, num_procs)) + " ".join(sys.argv[1:]))
+os.system(("%s -j%d -C %s" % (build_tool, num_procs, full_build_dir)) + " ".join(remaining_args))
