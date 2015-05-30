@@ -38,6 +38,9 @@ def getBuildDir():
 
         curdir = os.path.dirname(curdir)
 
+    # Shouldn't get here... build dir wasn't found
+    return ""
+
 def getBuildTool(build_dir):
     # with cmake 2.8, you can just call "cmake --build <dir>"
     # but with 2.6, we have to inspect CMakeCache.txt
