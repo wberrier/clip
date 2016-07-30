@@ -14,7 +14,7 @@ build_dir = "build"
 opts, remaining_args = getopt.gnu_getopt(sys.argv[1:], "", [ "build_dir=" ])
 for option, value in opts:
     if option == "--build_dir":
-        build_dir= value
+        build_dir = value
 
 # Allow build directories like this: el6-x86_64
 (code, dist) = commands.getstatusoutput("get_dist")
@@ -38,7 +38,7 @@ def getBuildDir():
 
         curdir = os.path.dirname(curdir)
 
-    # Shouldn't get here... build dir wasn't found
+    # Didn't find the build dir...
     return ""
 
 def getBuildTool(build_dir):
@@ -62,9 +62,9 @@ def getBuildTool(build_dir):
     return "make"
 
 def getProcCount():
-    """ Get number of processors + 1"""
-    if os.environ.has_key('BUILD_NUM_PROCESSORS'):
-        return int(os.environ['BUILD_NUM_PROCESSORS'])
+    """ Get number of processors """
+    if os.environ.has_key('NUM_CORES_TO_USE'):
+        return int(os.environ['NUM_CORES_TO_USE'])
 
     count = 1
     for line in open("/proc/cpuinfo").readlines():
@@ -75,11 +75,11 @@ def getProcCount():
 
 full_build_dir = getBuildDir()
 build_tool = getBuildTool(full_build_dir)
-#print("Build directory: " + full_build_dir)
+print("Build directory: " + full_build_dir)
 #print("Build tool: " + build_tool)
 #sys.exit(1)
 
 num_procs = getProcCount()
-#num_procs = 1
 
+# Run build
 os.system(("%s -j%d -C %s" % (build_tool, num_procs, full_build_dir)) + " ".join(remaining_args))
