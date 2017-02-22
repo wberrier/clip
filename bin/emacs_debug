@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+
+import os
+import os.path
+import ConfigParser
+
+# #Sample config (.emacs_debug.conf)
+#[config]
+#args=executable args
+
+def getConfigDir():
+    """Get the directory that has the config file"""
+
+    curdir = os.getcwd()
+    while curdir != "/":
+
+        test_file = curdir + "/.emacs_debug.conf"
+        if os.path.exists(test_file):
+            return curdir
+
+        curdir = os.path.dirname(curdir)
+
+    # Didn't find the config...
+    return ""
+
+config_dir = getConfigDir()
+
+if config_dir == "":
+    print "Unable to find .emacs_debug.conf"
+    sys.exit(1)
+
+# Read config file
+config = ConfigParser.SafeConfigParser()
+config.read(config_dir + os.sep + ".emacs_debug.conf")
+
+args = config.get('config', 'args')
+
+command = "gdb -i=mi --args " + args
+
+# For debugging (can't actually print anything out or else it will mess up emacs)
+#print "Running: " + command
+
+# Run build
+os.system(command)
