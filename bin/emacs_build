@@ -7,8 +7,8 @@ import ConfigParser
 
 # Example config file: (.emacs_build.conf)
 #
-#[host]
-#command=make -j@NUM_CORES_TO_USE@ host_target
+#[release]
+#command=make -j@NUM_CORES_TO_USE@ release_target
 #
 #[cross]
 #command=make -j@NUM_CORES_TO_USE@ cross_target
@@ -46,7 +46,7 @@ def getProcCount():
 
 
 # Default build type
-build_type = "host"
+build_type = "release"
 
 if len(sys.argv) > 1:
     build_type = sys.argv[1]
