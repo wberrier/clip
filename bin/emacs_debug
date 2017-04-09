@@ -29,16 +29,18 @@ if config_dir == "":
     print "Unable to find .emacs_debug.conf"
     sys.exit(1)
 
-# Read config file
-config = ConfigParser.SafeConfigParser()
+# Read config file (and set some defaults)
+config = ConfigParser.SafeConfigParser({'working_dir' : '.'})
 config.read(config_dir + os.sep + ".emacs_debug.conf")
 
 args = config.get('config', 'args')
+working_dir = config.get('config', 'working_dir')
 
 command = "gdb -i=mi --args " + args
 
 # For debugging (can't actually print anything out or else it will mess up emacs)
 #print "Running: " + command
 
-# Run build
+# Run debug command
+os.chdir(config_dir + os.sep + working_dir)
 os.system(command)
