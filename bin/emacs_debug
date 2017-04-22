@@ -43,4 +43,5 @@ command = "gdb -i=mi --args " + args
 
 # Run debug command
 os.chdir(config_dir + os.sep + working_dir)
-os.system(command)
+ret = os.WEXITSTATUS(os.system(command))
+sys.exit(ret)
