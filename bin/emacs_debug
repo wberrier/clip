@@ -30,16 +30,18 @@ if config_dir == "":
     sys.exit(1)
 
 # Read config file (and set some defaults)
-config = ConfigParser.SafeConfigParser({'working_dir' : '.', 'gdb' : 'gdb'})
+config = ConfigParser.SafeConfigParser({'working_dir' : '.', 'gdb' : 'gdb', 'gdb_args' : '', 'program_args' : ''})
 config.read(config_dir + os.sep + ".emacs_debug.conf")
 
 working_dir = config.get('config', 'working_dir')
 
 gdb_command = config.get('config', 'gdb')
+gdb_args = config.get('config', 'gdb_args')
 
-args = config.get('config', 'args')
+program = config.get('config', 'program')
+program_args = config.get('config', 'program_args')
 
-command = gdb_command + " -i=mi --args " + args
+command = gdb_command + " " + gdb_args + " -i=mi --args " + program + " " + program_args
 
 # For debugging (can't actually print anything out or else it will mess up emacs)
 #print "Running: " + command
