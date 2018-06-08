@@ -54,7 +54,7 @@ if config_dir == "":
 # Read config file
 config = loadJsonFile(config_dir + os.sep + ".emacs_project.json")
 
-working_dir = config['debug']['working_dir']
+working_dir = config['debug'].get('working_dir', '.')
 
 gdb_command = config['debug'].get('gdb', 'gdb')
 gdb_args = config['debug'].get('gdb_args', '')

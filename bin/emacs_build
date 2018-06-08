@@ -81,7 +81,7 @@ config = loadJsonFile(config_dir + os.sep + ".emacs_project.json")
 
 # get command and replace core count
 command = config['build'][build_type]['command']
-working_dir = config_dir + os.path.sep + config['build'][build_type]['working_dir']
+working_dir = config_dir + os.path.sep + config['build'][build_type].get('working_dir', '.')
 command = command.replace("@NUM_CORES_TO_USE@", str(num_procs))
 
 # Print out directory for emacs benefit (compilation-mode)
