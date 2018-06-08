@@ -3,25 +3,34 @@
 import json
 import os
 import sys
-import configparser
+
+# TODO: consolidate these helper functions
+
+def removeComments(text):
+    ret = ""
+    count = 0
+    for line in text.split("\n"):
+        if not line.lstrip().startswith("//"):
+            ret += line + "\n"
+            #print str(count) + ":" + line
+            count += 1
+    return ret
+
+def loadJsonFile(filename):
+    # Read config file
+    json_text = open(filename).read()
+    return json.loads(removeComments(json_text))
 
 project_dir = sys.argv[1]
-cquery_config_file = project_dir + os.sep + ".emacs_cquery.conf"
+cquery_config_file = project_dir + os.sep + ".emacs_project.json"
 
 # Try to read config file
-config = configparser.ConfigParser()
-# set some defaults
-config.add_section('config')
-config.set('config', 'working_dir',       'build')
-config.set('config', 'override_compiler', 'false')
-config.set('config', 'ignore_args',       '')
+config = loadJsonFile(cquery_config_file)
 
-if os.path.exists(cquery_config_file):
-    config.read(cquery_config_file)
-
-working_dir       = config.get       ('config', 'working_dir')
-override_compiler = config.getboolean('config', 'override_compiler')
-ignore_args       = config.get       ('config', 'ignore_args').split()
+# get values (with some fallback defaults)
+working_dir       = config['cquery'].get('working_dir', 'build')
+override_compiler = config['cquery'].get('override_compiler', False)
+ignore_args       = config['cquery'].get('ignore_args', '').split()
 
 with open(os.path.join(project_dir, working_dir, 'compile_commands.json')) as f:
 

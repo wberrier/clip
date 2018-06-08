@@ -2,11 +2,33 @@
 
 import os
 import os.path
-import ConfigParser
+import json
 
-# #Sample config (.emacs_debug.conf)
-#[config]
-#args=executable args
+#Sample config (.emacs_project.json)
+#{
+#    "debug": {
+#        "program": "executable",
+#        "program_args": "args",
+#        "working_dir": "build-debug"
+#    }
+#}
+
+# TODO: consolidate these helper functions
+
+def removeComments(text):
+    ret = ""
+    count = 0
+    for line in text.split("\n"):
+        if not line.lstrip().startswith("//"):
+            ret += line + "\n"
+            #print str(count) + ":" + line
+            count += 1
+    return ret
+
+def loadJsonFile(filename):
+    # Read config file
+    json_text = open(filename).read()
+    return json.loads(removeComments(json_text))
 
 def getConfigDir():
     """Get the directory that has the config file"""
@@ -14,7 +36,7 @@ def getConfigDir():
     curdir = os.getcwd()
     while curdir != "/":
 
-        test_file = curdir + "/.emacs_debug.conf"
+        test_file = curdir + "/.emacs_project.json"
         if os.path.exists(test_file):
             return curdir
 
@@ -26,20 +48,19 @@ def getConfigDir():
 config_dir = getConfigDir()
 
 if config_dir == "":
-    print "Unable to find .emacs_debug.conf"
+    print "Unable to find .emacs_project.json"
     sys.exit(1)
 
-# Read config file (and set some defaults)
-config = ConfigParser.SafeConfigParser({'working_dir' : '.', 'gdb' : 'gdb', 'gdb_args' : '', 'program_args' : ''})
-config.read(config_dir + os.sep + ".emacs_debug.conf")
+# Read config file
+config = loadJsonFile(config_dir + os.sep + ".emacs_project.json")
 
-working_dir = config.get('config', 'working_dir')
+working_dir = config['debug']['working_dir']
 
-gdb_command = config.get('config', 'gdb')
-gdb_args = config.get('config', 'gdb_args')
+gdb_command = config['debug'].get('gdb', 'gdb')
+gdb_args = config['debug'].get('gdb_args', '')
 
-program = config.get('config', 'program')
-program_args = config.get('config', 'program_args')
+program = config['debug']['program']
+program_args = config['debug'].get('program_args', '')
 
 command = gdb_command + " " + gdb_args + " -i=mi --args " + program + " " + program_args
 

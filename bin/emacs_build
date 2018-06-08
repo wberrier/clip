@@ -3,19 +3,35 @@
 import os
 import os.path
 import sys
-import ConfigParser
+import json
+#import pprint
 
-# Example config file: (.emacs_build.conf)
-#
-#[release]
-#command=make -j@NUM_CORES_TO_USE@ release_target
-#
-#[cross]
-#command=make -j@NUM_CORES_TO_USE@ cross_target
-#
-#[debug]
-#command=make -j@NUM_CORES_TO_USE@ debug_target
-#
+# Example config file: (.emacs_project.json)
+#{
+#	"build": {
+#		"debug": {
+#			"command": "make -j@NUM_CORES_TO_USE@ debug_target",
+#			"working_dir": "build-debug"
+#		}
+#	}
+#}
+
+# TODO: consolidate these helper functions
+
+def removeComments(text):
+    ret = ""
+    count = 0
+    for line in text.split("\n"):
+        if not line.lstrip().startswith("//"):
+            ret += line + "\n"
+            #print str(count) + ":" + line
+            count += 1
+    return ret
+
+def loadJsonFile(filename):
+    # Read config file
+    json_text = open(filename).read()
+    return json.loads(removeComments(json_text))
 
 def getConfigDir():
     """Get the directory that has the config file"""
@@ -23,7 +39,7 @@ def getConfigDir():
     curdir = os.getcwd()
     while curdir != "/":
 
-        test_file = curdir + "/.emacs_build.conf"
+        test_file = curdir + "/.emacs_project.json"
         if os.path.exists(test_file):
             return curdir
 
@@ -54,18 +70,18 @@ if len(sys.argv) > 1:
 config_dir = getConfigDir()
 
 if config_dir == "":
-    print "Unable to find .emacs_build.conf"
+    print "Unable to find .emacs_project.json"
     sys.exit(1)
 
 num_procs = getProcCount()
 
 # Read config file
-config = ConfigParser.SafeConfigParser({'working_dir' : '.'})
-config.read(config_dir + os.sep + ".emacs_build.conf")
+config = loadJsonFile(config_dir + os.sep + ".emacs_project.json")
+#pprint.pprint(config)
 
 # get command and replace core count
-command = config.get(build_type, 'command')
-working_dir = config_dir + os.path.sep + config.get(build_type, 'working_dir')
+command = config['build'][build_type]['command']
+working_dir = config_dir + os.path.sep + config['build'][build_type]['working_dir']
 command = command.replace("@NUM_CORES_TO_USE@", str(num_procs))
 
 # Print out directory for emacs benefit (compilation-mode)
@@ -78,3 +94,4 @@ print("Command: " + command)
 os.chdir(working_dir)
 ret = os.WEXITSTATUS(os.system(command))
 sys.exit(ret)
+
