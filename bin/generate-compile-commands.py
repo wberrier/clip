@@ -6,7 +6,7 @@ import sys
 import emacsproject.config
 
 project_dir = sys.argv[1]
-cquery_config_file = project_dir + os.sep + ".emacs_project.json"
+cquery_config_file = project_dir + os.sep + emacsproject.config.filename
 
 # Try to read config file
 config = emacsproject.config.loadJsonFile(cquery_config_file)

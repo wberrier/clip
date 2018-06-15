@@ -38,13 +38,13 @@ if len(sys.argv) > 1:
 config_dir = emacsproject.config.getConfigDir()
 
 if config_dir == "":
-    print "Unable to find .emacs_project.json"
+    print "Unable to find " + emacsproject.config.filename
     sys.exit(1)
 
 num_procs = getProcCount()
 
 # Read config file
-config = emacsproject.config.loadJsonFile(config_dir + os.sep + ".emacs_project.json")
+config = emacsproject.config.loadJsonFile(config_dir + os.sep + emacsproject.config.filename)
 #pprint.pprint(config)
 
 # get command and replace core count

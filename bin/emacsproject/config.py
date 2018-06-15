@@ -3,6 +3,8 @@ import os
 import os.path
 import json
 
+filename = ".emacs_project.json"
+
 def removeComments(text):
     ret = ""
     count = 0
@@ -24,7 +26,7 @@ def getConfigDir():
     curdir = os.getcwd()
     while curdir != "/":
 
-        test_file = curdir + "/.emacs_project.json"
+        test_file = curdir + "/" + filename
         if os.path.exists(test_file):
             return curdir
 
