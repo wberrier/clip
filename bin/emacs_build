@@ -3,7 +3,7 @@
 import os
 import os.path
 import sys
-import json
+import emacsproject.config
 #import pprint
 
 # Example config file: (.emacs_project.json)
@@ -15,38 +15,6 @@ import json
 #		}
 #	}
 #}
-
-# TODO: consolidate these helper functions
-
-def removeComments(text):
-    ret = ""
-    count = 0
-    for line in text.split("\n"):
-        if not line.lstrip().startswith("//"):
-            ret += line + "\n"
-            #print str(count) + ":" + line
-            count += 1
-    return ret
-
-def loadJsonFile(filename):
-    # Read config file
-    json_text = open(filename).read()
-    return json.loads(removeComments(json_text))
-
-def getConfigDir():
-    """Get the directory that has the config file"""
-
-    curdir = os.getcwd()
-    while curdir != "/":
-
-        test_file = curdir + "/.emacs_project.json"
-        if os.path.exists(test_file):
-            return curdir
-
-        curdir = os.path.dirname(curdir)
-
-    # Didn't find the config dir...
-    return ""
 
 def getProcCount():
     """ Get number of processors """
@@ -67,7 +35,7 @@ build_type = "release"
 if len(sys.argv) > 1:
     build_type = sys.argv[1]
 
-config_dir = getConfigDir()
+config_dir = emacsproject.config.getConfigDir()
 
 if config_dir == "":
     print "Unable to find .emacs_project.json"
@@ -76,7 +44,7 @@ if config_dir == "":
 num_procs = getProcCount()
 
 # Read config file
-config = loadJsonFile(config_dir + os.sep + ".emacs_project.json")
+config = emacsproject.config.loadJsonFile(config_dir + os.sep + ".emacs_project.json")
 #pprint.pprint(config)
 
 # get command and replace core count
