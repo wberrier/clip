@@ -6,10 +6,10 @@ import sys
 import emacsproject.config
 
 project_dir = sys.argv[1]
-cquery_config_file = project_dir + os.sep + emacsproject.config.filename
+cquery_config_file = project_dir + os.sep + emacsproject.config.FILENAME
 
 # Try to read config file
-config = emacsproject.config.loadJsonFile(cquery_config_file)
+config = emacsproject.config.load_json_file(cquery_config_file)
 
 # get values (with some fallback defaults)
 working_dir       = config['cquery'].get('working_dir', 'build')

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import os
@@ -14,14 +14,14 @@ import emacsproject.config
 #    }
 #}
 
-config_dir = emacsproject.config.getConfigDir()
+config_dir = emacsproject.config.get_config_dir()
 
 if config_dir == "":
-    print "Unable to find " + emacsproject.config.filename
+    print("Unable to find " + emacsproject.config.FILENAME)
     sys.exit(1)
 
 # Read config file
-config = emacsproject.config.loadJsonFile(config_dir + os.sep + emacsproject.config.filename)
+config = emacsproject.config.load_json_file(config_dir + os.sep + emacsproject.config.FILENAME)
 
 working_dir = config['debug'].get('working_dir', '.')
 

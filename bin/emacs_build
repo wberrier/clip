@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+
+"""Run a build according to a config file"""
 
 import os
 import os.path
@@ -16,9 +18,9 @@ import emacsproject.config
 #	}
 #}
 
-def getProcCount():
+def get_proc_count():
     """ Get number of processors """
-    if os.environ.has_key('NUM_CORES_TO_USE'):
+    if 'NUM_CORES_TO_USE' in os.environ:
         return int(os.environ['NUM_CORES_TO_USE'])
 
     count = 1
@@ -28,23 +30,22 @@ def getProcCount():
 
     return count
 
-
 # Default build type
 build_type = "release"
 
 if len(sys.argv) > 1:
     build_type = sys.argv[1]
 
-config_dir = emacsproject.config.getConfigDir()
+config_dir = emacsproject.config.get_config_dir()
 
 if config_dir == "":
-    print "Unable to find " + emacsproject.config.filename
+    print("Unable to find " + emacsproject.config.FILENAME)
     sys.exit(1)
 
-num_procs = getProcCount()
+num_procs = get_proc_count()
 
 # Read config file
-config = emacsproject.config.loadJsonFile(config_dir + os.sep + emacsproject.config.filename)
+config = emacsproject.config.load_json_file(config_dir + os.sep + emacsproject.config.FILENAME)
 #pprint.pprint(config)
 
 # get command and replace core count
@@ -62,4 +63,3 @@ print("Command: " + command)
 os.chdir(working_dir)
 ret = os.WEXITSTATUS(os.system(command))
 sys.exit(ret)
-
