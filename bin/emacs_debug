@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Run gdb inside of emacs for a given emacsproject"""
+
 import sys
 import os
 import os.path
@@ -14,29 +16,34 @@ import emacsproject.config
 #    }
 #}
 
-config_dir = emacsproject.config.get_config_dir()
+def main():
+    """main"""
 
-if config_dir == "":
-    print("Unable to find " + emacsproject.config.FILENAME)
-    sys.exit(1)
+    config_dir = emacsproject.config.get_config_dir()
 
-# Read config file
-config = emacsproject.config.load_json_file(config_dir + os.sep + emacsproject.config.FILENAME)
+    if config_dir == "":
+        print("Unable to find " + emacsproject.config.FILENAME)
+        return 1
 
-working_dir = config['debug'].get('working_dir', '.')
+    # Read config file
+    config = emacsproject.config.load_json_file(config_dir + os.sep + emacsproject.config.FILENAME)
 
-gdb_command = config['debug'].get('gdb', 'gdb')
-gdb_args = config['debug'].get('gdb_args', '')
+    working_dir = config['debug'].get('working_dir', '.')
 
-program = config['debug']['program']
-program_args = config['debug'].get('program_args', '')
+    gdb_command = config['debug'].get('gdb', 'gdb')
+    gdb_args = config['debug'].get('gdb_args', '')
 
-command = gdb_command + " " + gdb_args + " -i=mi --args " + program + " " + program_args
+    program = config['debug']['program']
+    program_args = config['debug'].get('program_args', '')
 
-# For debugging (can't actually print anything out or else it will mess up emacs)
-#print "Running: " + command
+    command = gdb_command + " " + gdb_args + " -i=mi --args " + program + " " + program_args
 
-# Run debug command
-os.chdir(config_dir + os.sep + working_dir)
-ret = os.WEXITSTATUS(os.system(command))
-sys.exit(ret)
+    # For debugging (can't actually print anything out or else it will mess up emacs)
+    #print "Running: " + command
+
+    # Run debug command
+    os.chdir(config_dir + os.sep + working_dir)
+    return os.WEXITSTATUS(os.system(command))
+
+if __name__ == "__main__":
+    sys.exit(main())

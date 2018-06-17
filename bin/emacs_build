@@ -30,36 +30,41 @@ def get_proc_count():
 
     return count
 
-# Default build type
-build_type = "release"
+def main():
+    """main"""
 
-if len(sys.argv) > 1:
-    build_type = sys.argv[1]
+    # Default build type
+    build_type = "release"
 
-config_dir = emacsproject.config.get_config_dir()
+    if len(sys.argv) > 1:
+        build_type = sys.argv[1]
 
-if config_dir == "":
-    print("Unable to find " + emacsproject.config.FILENAME)
-    sys.exit(1)
+    config_dir = emacsproject.config.get_config_dir()
 
-num_procs = get_proc_count()
+    if config_dir == "":
+        print("Unable to find " + emacsproject.config.FILENAME)
+        return 1
 
-# Read config file
-config = emacsproject.config.load_json_file(config_dir + os.sep + emacsproject.config.FILENAME)
-#pprint.pprint(config)
+    num_procs = get_proc_count()
 
-# get command and replace core count
-command = config['build'][build_type]['command']
-working_dir = config_dir + os.path.sep + config['build'][build_type].get('working_dir', '.')
-command = command.replace("@NUM_CORES_TO_USE@", str(num_procs))
+    # Read config file
+    config = emacsproject.config.load_json_file(config_dir + os.sep + emacsproject.config.FILENAME)
+    #pprint.pprint(config)
 
-# Print out directory for emacs benefit (compilation-mode)
-# (it's expecting 'make' to be used, which prints out in this format)
-print("Entering directory `%s'" % working_dir)
-print("Command: " + command)
-#sys.exit(1)
+    # get command and replace core count
+    command = config['build'][build_type]['command']
+    working_dir = config_dir + os.path.sep + config['build'][build_type].get('working_dir', '.')
+    command = command.replace("@NUM_CORES_TO_USE@", str(num_procs))
 
-# Run command
-os.chdir(working_dir)
-ret = os.WEXITSTATUS(os.system(command))
-sys.exit(ret)
+    # Print out directory for emacs benefit (compilation-mode)
+    # (it's expecting 'make' to be used, which prints out in this format)
+    print("Entering directory `%s'" % working_dir)
+    print("Command: " + command)
+    #sys.exit(1)
+
+    # Run command
+    os.chdir(working_dir)
+    return os.WEXITSTATUS(os.system(command))
+
+if __name__ == "__main__":
+    sys.exit(main())
