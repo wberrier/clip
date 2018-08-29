@@ -30,6 +30,18 @@ def get_proc_count():
 
     return count
 
+def set_environment(env_string):
+    """Set the environment according to a string"""
+
+    if ':' in env_string:
+        key_values = env_string.split(':')
+    else:
+        key_values = (env_string,)
+
+    for key_value in key_values:
+        (key, value) = key_value.split('=')
+        os.environ[key] = value
+
 def main():
     """main"""
 
@@ -55,6 +67,11 @@ def main():
     command = config['build'][build_type]['command']
     working_dir = config_dir + os.path.sep + config['build'][build_type].get('working_dir', '.')
     command = command.replace("@NUM_CORES_TO_USE@", str(num_procs))
+
+    if 'env' in config['build'][build_type]:
+        env = config['build'][build_type]['env']
+        print("Setting environment: " + env)
+        set_environment(env)
 
     # Print out directory for emacs benefit (compilation-mode)
     # (it's expecting 'make' to be used, which prints out in this format)
