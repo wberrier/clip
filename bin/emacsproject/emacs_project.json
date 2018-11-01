@@ -1,0 +1,31 @@
+{
+	// parameters that will build this project
+	"build": {
+		"release": {
+			"command": "ninja -j@NUM_CORES_TO_USE@'",
+			"working_dir": "build"
+		},
+		"debug": {
+			"command": "ninja -j@NUM_CORES_TO_USE@'",
+			"working_dir": "build-debug"
+		},
+		"cross": {
+			"command": "ninja -j@NUM_CORES_TO_USE@'",
+			"working_dir": "build-cross"
+		}
+	},
+
+	"debug": {
+
+		"program": "tests",
+		"working_dir": "build-debug",
+
+		"program_args": ""
+	},
+
+	"cquery": {
+		"working_dir": "build-debug"
+		//"ignore_args": "args to ignore",
+		//"override_compiler": true
+	}
+}
