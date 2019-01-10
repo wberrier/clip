@@ -6,6 +6,7 @@ import os
 import os.path
 import sys
 import emacsproject.config
+import emacsproject.common
 #import pprint
 
 # Example config file: (.emacs_project.json)
@@ -29,18 +30,6 @@ def get_proc_count():
             count += 1
 
     return count
-
-def set_environment(env_string):
-    """Set the environment according to a string"""
-
-    if ':' in env_string:
-        key_values = env_string.split(':')
-    else:
-        key_values = (env_string,)
-
-    for key_value in key_values:
-        (key, value) = key_value.split('=')
-        os.environ[key] = value
 
 def main():
     """main"""
@@ -71,7 +60,7 @@ def main():
     if 'env' in config['build'][build_type]:
         env = config['build'][build_type]['env']
         print("Setting environment: " + env)
-        set_environment(env)
+        emacsproject.common.set_environment(env)
 
     # Print out directory for emacs benefit (compilation-mode)
     # (it's expecting 'make' to be used, which prints out in this format)

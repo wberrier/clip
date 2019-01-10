@@ -6,6 +6,7 @@ import sys
 import os
 import os.path
 import emacsproject.config
+import emacsproject.common
 
 #Sample config (.emacs_project.json)
 #{
@@ -37,6 +38,10 @@ def main():
     program_args = config['debug'].get('program_args', '')
 
     command = gdb_command + " " + gdb_args + " -i=mi --args " + program + " " + program_args
+
+    if 'env' in config['debug']:
+        env = config['debug']['env']
+        emacsproject.common.set_environment(env)
 
     # For debugging (can't actually print anything out or else it will mess up emacs)
     #print "Running: " + command
