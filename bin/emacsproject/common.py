@@ -3,14 +3,14 @@ r"""Common helpers for emacs project
 
 import os
 
-def set_environment(env_string):
-    """Set the environment according to a string"""
+def print_environment(env):
+    """Print environment"""
 
-    if ':' in env_string:
-        key_values = env_string.split(':')
-    else:
-        key_values = (env_string,)
+    for key, value in env.items():
+        print("%s=%s" % (key, value))
 
-    for key_value in key_values:
-        (key, value) = key_value.split('=')
+def set_environment(env):
+    """Set the environment according to a list of strings"""
+
+    for key, value in env.items():
         os.environ[key] = value

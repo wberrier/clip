@@ -59,7 +59,7 @@ def main():
 
     if 'env' in config['build'][build_type]:
         env = config['build'][build_type]['env']
-        print("Setting environment: " + env)
+        emacsproject.common.print_environment(env)
         emacsproject.common.set_environment(env)
 
     # Print out directory for emacs benefit (compilation-mode)
