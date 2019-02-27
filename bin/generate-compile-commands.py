@@ -25,6 +25,10 @@ def main():
     project_dir = sys.argv[1]
     cquery_config_file = project_dir + os.sep + emacsproject.config.FILENAME
 
+    if not os.path.exists(cquery_config_file):
+        print("ERROR: unable to locate emacs project config file: " + cquery_config_file)
+        sys.exit(1)
+
     # Try to read config file
     config = emacsproject.config.load_json_file(cquery_config_file)
 
