@@ -8,8 +8,9 @@
 import json
 import os
 import sys
-import emacsproject.config
 import re
+import emacsproject.config
+
 
 def perform_substitutions(line, regex_map):
     """Generic function to exercise a bunch of regexes on some text"""
@@ -18,6 +19,7 @@ def perform_substitutions(line, regex_map):
         line = re.sub(regex, new_text, line)
 
     return line
+
 
 def main():
     """main"""
@@ -43,43 +45,54 @@ def main():
     command_filter_regexes = config['cquery'].get('command_filter_regexes', {})
     file_filter_regexes = config['cquery'].get('file_filter_regexes', {})
 
-    with open(os.path.join(project_dir, working_dir, 'compile_commands.json')) as descriptor:
+    # Default if not set in config file
+    compile_commands_files = config['cquery'].get('compile_commands_files', ['compile_commands.json'])
 
-        commands_db = json.load(descriptor)
+    complete_commands_db = []
 
-        for entry in commands_db:
+    for compile_commands_file in compile_commands_files:
 
-            # Perform all filter regexs
-            for i in ['directory', 'command', 'file']:
-                entry[i] = perform_substitutions(entry[i], filter_regexes)
+        # TODO: take a list of files and concatenate them together
+        with open(os.path.join(project_dir, working_dir, compile_commands_file)) as descriptor:
 
-            entry['directory'] = perform_substitutions(entry['directory'], directory_filter_regexes)
-            entry['command'] = perform_substitutions(entry['command'], command_filter_regexes)
-            entry['file'] = perform_substitutions(entry['file'], file_filter_regexes)
+            commands_db = json.load(descriptor)
 
-            command = entry['command']
+            for entry in commands_db:
 
-            args = command.split()
+                # Perform all filter regexs
+                for i in ['directory', 'command', 'file']:
+                    entry[i] = perform_substitutions(entry[i], filter_regexes)
 
-            new_args = []
+                entry['directory'] = perform_substitutions(entry['directory'], directory_filter_regexes)
+                entry['command'] = perform_substitutions(entry['command'], command_filter_regexes)
+                entry['file'] = perform_substitutions(entry['file'], file_filter_regexes)
 
-            # Sanitize compile_commands.json
-            for arg in args:
+                command = entry['command']
 
-                if override_compiler:
-                    if arg.endswith("gcc"):
-                        arg = "clang"
-                    elif arg.endswith("g++"):
-                        arg = "clang++"
+                args = command.split()
 
-                if arg in ignore_args:
-                    arg = ""
+                new_args = []
 
-                new_args.append(arg)
+                # Sanitize compile_commands.json
+                for arg in args:
 
-            entry['command'] = " ".join(new_args)
+                    if override_compiler:
+                        if arg.endswith("gcc"):
+                            arg = "clang"
+                        elif arg.endswith("g++"):
+                            arg = "clang++"
 
-        json.dump(commands_db, sys.stdout)
+                    if arg in ignore_args:
+                        arg = ""
+
+                    new_args.append(arg)
+
+                entry['command'] = " ".join(new_args)
+
+                complete_commands_db.append(entry)
+
+    json.dump(complete_commands_db, sys.stdout)
+
 
 if __name__ == "__main__":
     main()

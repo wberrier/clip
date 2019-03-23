@@ -33,5 +33,12 @@
 		// "filter_regexes": {
 		// 	"regex": "replacement"
 		// }
+
+		// You can specify more than one file that will get merged into one
+		"compile_commands_files": [
+			"compile_commands.json",
+			"compile_commands2.json"
+		]
+
 	}
 }
