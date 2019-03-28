@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Modify compile_commands.json for cquery depending on emacsproject config"""
+"""Generate compile_commands.json depending on emacsproject config"""
 
 # Don't complain about dashes in script name, I like them better than underscores
 # pylint: disable=locally-disabled, invalid-name
@@ -25,28 +25,28 @@ def main():
     """main"""
 
     project_dir = sys.argv[1]
-    cquery_config_file = project_dir + os.sep + emacsproject.config.FILENAME
+    config_file = project_dir + os.sep + emacsproject.config.FILENAME
 
-    if not os.path.exists(cquery_config_file):
-        print("ERROR: unable to locate emacs project config file: " + cquery_config_file)
+    if not os.path.exists(config_file):
+        print("ERROR: unable to locate emacs project config file: " + config_file)
         sys.exit(1)
 
     # Try to read config file
-    config = emacsproject.config.load_json_file(cquery_config_file)
+    config = emacsproject.config.load_json_file(config_file)
 
     # get values (with some fallback defaults)
-    working_dir = config['cquery'].get('working_dir', 'build')
-    override_compiler = config['cquery'].get('override_compiler', False)
-    ignore_args = config['cquery'].get('ignore_args', '').split()
+    working_dir = config['compile-commands'].get('working_dir', 'build')
+    override_compiler = config['compile-commands'].get('override_compiler', False)
+    ignore_args = config['compile-commands'].get('ignore_args', '').split()
 
     # Process some filter regexes
-    filter_regexes = config['cquery'].get('filter_regexes', {})
-    directory_filter_regexes = config['cquery'].get('directory_filter_regexes', {})
-    command_filter_regexes = config['cquery'].get('command_filter_regexes', {})
-    file_filter_regexes = config['cquery'].get('file_filter_regexes', {})
+    filter_regexes = config['compile-commands'].get('filter_regexes', {})
+    directory_filter_regexes = config['compile-commands'].get('directory_filter_regexes', {})
+    command_filter_regexes = config['compile-commands'].get('command_filter_regexes', {})
+    file_filter_regexes = config['compile-commands'].get('file_filter_regexes', {})
 
     # Default if not set in config file
-    compile_commands_files = config['cquery'].get('compile_commands_files', ['compile_commands.json'])
+    compile_commands_files = config['compile-commands'].get('files', ['compile_commands.json'])
 
     complete_commands_db = []
 
