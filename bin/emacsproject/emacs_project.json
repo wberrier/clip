@@ -23,7 +23,7 @@
 		"program_args": ""
 	},
 
-	"cquery": {
+	"compile-commands": {
 		"working_dir": "build-debug",
 		//"ignore_args": "args to ignore",
 		//"override_compiler": true
@@ -35,7 +35,7 @@
 		// }
 
 		// You can specify more than one file that will get merged into one
-		"compile_commands_files": [
+		"files": [
 			"compile_commands.json",
 			"compile_commands2.json"
 		]
