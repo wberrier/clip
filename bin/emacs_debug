@@ -8,14 +8,17 @@ import os.path
 import emacsproject.config
 import emacsproject.common
 
-#Sample config (.emacs_project.json)
-#{
-#    "debug": {
-#        "program": "executable",
-#        "program_args": "args",
-#        "working_dir": "build-debug"
-#    }
-#}
+"""
+Sample config (.emacs_project.json)
+{
+    "debug": {
+        "program": "executable",
+        "program_args": "args",
+        "working_dir": "build-debug"
+    }
+}
+"""
+
 
 def main():
     """main"""
@@ -34,21 +37,29 @@ def main():
     gdb_command = config['debug'].get('gdb', 'gdb')
     gdb_args = config['debug'].get('gdb_args', '')
 
+    command_prefix = config['debug'].get('command-prefix', '')
+
+    if len(command_prefix) != 0:
+        command_prefix = command_prefix + ' '
+
     program = config['debug']['program']
     program_args = config['debug'].get('program_args', '')
 
-    command = gdb_command + " " + gdb_args + " -i=mi --args " + program + " " + program_args
+    # TODO: how to get pts working?
+    command = command_prefix + '"' + gdb_command + " " + gdb_args + " -i=mi --args " + program + " " + program_args + '"'
+    # command = gdb_command + " " + gdb_args + " -i=mi --args " + program + " " + program_args
 
     if 'env' in config['debug']:
         env = config['debug']['env']
         emacsproject.common.set_environment(env)
 
     # For debugging (can't actually print anything out or else it will mess up emacs)
-    #print "Running: " + command
+    # print("Running: " + command)
 
     # Run debug command
     os.chdir(config_dir + os.sep + working_dir)
     return os.WEXITSTATUS(os.system(command))
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -8,6 +8,8 @@ import os.path
 import json
 
 FILENAME = ".emacs_project.json"
+DEBUG = False
+
 
 def remove_comments(text):
     """Remove comments from json string
@@ -20,15 +22,18 @@ def remove_comments(text):
     for line in text.split("\n"):
         if not line.lstrip().startswith("//"):
             ret += line + "\n"
-            #print str(count) + ":" + line
+            if DEBUG:
+                print(str(count) + ":" + line)
             count += 1
     return ret
+
 
 def load_json_file(json_file):
     """Read json file"""
 
     json_text = open(json_file).read()
     return json.loads(remove_comments(json_text))
+
 
 def get_config_dir():
     """Get the directory that has the config file"""
