@@ -72,9 +72,6 @@ def command_build(subcommand_args):
         clip.common.print_environment(env)
         clip.common.set_environment(env)
 
-    # Print out directory for emacs benefit (compilation-mode)
-    # (it's expecting 'make' to be used, which prints out in this format)
-    print("Entering directory `%s'" % working_dir)
     print("Command: " + command)
     if DEBUG:
         sys.exit(1)
@@ -117,7 +114,7 @@ def command_debug(subcommand_args):
         env = config['debug']['env']
         clip.common.set_environment(env)
 
-    # For debugging (can't actually print anything out or else it will mess up emacs)
+    # For debugging (can't actually print anything out or else it will mess up gdb machine interface)
     # print("Running: " + command)
 
     # Run debug command
@@ -135,7 +132,7 @@ def command_generate_cdb(subcommand_args):
     config_file = project_dir + os.sep + clip.config.FILENAME
 
     if not os.path.exists(config_file):
-        print("ERROR: unable to locate emacs project config file: " + config_file)
+        print("ERROR: unable to locate clip project config file: " + config_file)
         sys.exit(1)
 
     # Try to read config file
