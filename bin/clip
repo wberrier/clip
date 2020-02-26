@@ -1,0 +1,241 @@
+#!/usr/bin/env python3
+
+"""clip: cli project development tool"""
+
+import re
+import sys
+import json
+import pprint
+import os.path
+
+# Development sys.path setup
+# TODO: pythonic way to set this for development and installed tool?
+sys.path.append(os.path.abspath(os.path.dirname(__file__) + os.sep + '../lib'))
+
+import clip.config
+import clip.common
+
+DEBUG = False
+
+
+def get_proc_count():
+    """ Get number of processors """
+    if 'NUM_CORES_TO_USE' in os.environ:
+        return int(os.environ['NUM_CORES_TO_USE'])
+
+    count = 1
+    for line in open("/proc/cpuinfo").readlines():
+        if line.startswith("processor"):
+            count += 1
+
+    return count
+
+
+def perform_substitutions(line, regex_map):
+    """Generic function to exercise a bunch of regexes on some text"""
+
+    for regex, new_text in regex_map.items():
+        line = re.sub(regex, new_text, line)
+
+    return line
+
+
+def command_build(subcommand_args):
+    """main"""
+
+    # Default build type
+    build_type = "release"
+
+    if len(subcommand_args) > 0:
+        build_type = subcommand_args[0]
+
+    config_dir = clip.config.get_config_dir()
+
+    if config_dir == "":
+        print("Unable to find " + clip.config.FILENAME)
+        return 1
+
+    num_procs = get_proc_count()
+
+    # Read config file
+    config = clip.config.load_json_file(config_dir + os.sep + clip.config.FILENAME)
+    if DEBUG:
+        pprint.pprint(config)
+
+    # get command and replace core count
+    command = config['build'][build_type]['command']
+    working_dir = config_dir + os.path.sep + config['build'][build_type].get('working_dir', '.')
+    command = command.replace("@NUM_CORES_TO_USE@", str(num_procs))
+
+    if 'env' in config['build'][build_type]:
+        env = config['build'][build_type]['env']
+        clip.common.print_environment(env)
+        clip.common.set_environment(env)
+
+    # Print out directory for emacs benefit (compilation-mode)
+    # (it's expecting 'make' to be used, which prints out in this format)
+    print("Entering directory `%s'" % working_dir)
+    print("Command: " + command)
+    if DEBUG:
+        sys.exit(1)
+
+    # Run command
+    os.chdir(working_dir)
+    return os.WEXITSTATUS(os.system(command))
+
+
+def command_debug(subcommand_args):
+    """main"""
+
+    config_dir = clip.config.get_config_dir()
+
+    if config_dir == "":
+        print("Unable to find " + clip.config.FILENAME)
+        return 1
+
+    # Read config file
+    config = clip.config.load_json_file(config_dir + os.sep + clip.config.FILENAME)
+
+    working_dir = config['debug'].get('working_dir', '.')
+
+    gdb_command = config['debug'].get('gdb', 'gdb')
+    gdb_args = config['debug'].get('gdb_args', '')
+
+    command_prefix = config['debug'].get('command-prefix', '')
+
+    if len(command_prefix) != 0:
+        command_prefix = command_prefix + ' '
+
+    program = config['debug']['program']
+    program_args = config['debug'].get('program_args', '')
+
+    # TODO: how to get pts working?
+    command = command_prefix + '"' + gdb_command + " " + gdb_args + " -i=mi --args " + program + " " + program_args + '"'
+    # command = gdb_command + " " + gdb_args + " -i=mi --args " + program + " " + program_args
+
+    if 'env' in config['debug']:
+        env = config['debug']['env']
+        clip.common.set_environment(env)
+
+    # For debugging (can't actually print anything out or else it will mess up emacs)
+    # print("Running: " + command)
+
+    # Run debug command
+    os.chdir(config_dir + os.sep + working_dir)
+    return os.WEXITSTATUS(os.system(command))
+
+
+def command_generate_cdb(subcommand_args):
+
+    try:
+        project_dir = subcommand_args[0]
+    except IndexError:
+        usage()
+        sys.exit()
+    config_file = project_dir + os.sep + clip.config.FILENAME
+
+    if not os.path.exists(config_file):
+        print("ERROR: unable to locate emacs project config file: " + config_file)
+        sys.exit(1)
+
+    # Try to read config file
+    config = clip.config.load_json_file(config_file)
+
+    # get values (with some fallback defaults)
+    working_dir = config['compile-commands'].get('working_dir', 'build')
+    override_compiler = config['compile-commands'].get('override_compiler', False)
+    ignore_args = config['compile-commands'].get('ignore_args', '').split()
+
+    # Process some filter regexes
+    filter_regexes = config['compile-commands'].get('filter_regexes', {})
+    directory_filter_regexes = config['compile-commands'].get('directory_filter_regexes', {})
+    command_filter_regexes = config['compile-commands'].get('command_filter_regexes', {})
+    file_filter_regexes = config['compile-commands'].get('file_filter_regexes', {})
+
+    # Default if not set in config file
+    compile_commands_files = config['compile-commands'].get('files', ['compile_commands.json'])
+
+    complete_commands_db = []
+
+    for compile_commands_file in compile_commands_files:
+
+        # TODO: take a list of files and concatenate them together
+        with open(os.path.join(project_dir, working_dir, compile_commands_file)) as descriptor:
+
+            commands_db = json.load(descriptor)
+
+            for entry in commands_db:
+
+                # Perform all filter regexs
+                for i in ['directory', 'command', 'file']:
+                    entry[i] = perform_substitutions(entry[i], filter_regexes)
+
+                entry['directory'] = perform_substitutions(entry['directory'], directory_filter_regexes)
+                entry['command'] = perform_substitutions(entry['command'], command_filter_regexes)
+                entry['file'] = perform_substitutions(entry['file'], file_filter_regexes)
+
+                command = entry['command']
+
+                args = command.split()
+
+                new_args = []
+
+                # Sanitize compile_commands.json
+                for arg in args:
+
+                    if override_compiler:
+                        if arg.endswith("gcc"):
+                            arg = "clang"
+                        elif arg.endswith("g++"):
+                            arg = "clang++"
+
+                    if arg in ignore_args:
+                        arg = ""
+
+                    new_args.append(arg)
+
+                entry['command'] = " ".join(new_args)
+
+                complete_commands_db.append(entry)
+
+    json.dump(complete_commands_db, sys.stdout)
+
+
+def usage():
+    usage_text = """
+
+./clip <sub command> <sub command arguments>
+
+ Sub commands:
+
+  build
+  debug
+  generate-compile-db <directory>
+
+"""
+    print(usage_text)
+
+
+def main():
+
+    try:
+        subcommand = sys.argv[1]
+        subcommand_args = sys.argv[2:]
+    except IndexError:
+        usage()
+        sys.exit(1)
+
+    if 'build' == subcommand:
+        command_build(subcommand_args)
+    elif 'debug' == subcommand:
+        command_debug(subcommand_args)
+    elif 'generate-compile-db' == subcommand:
+        command_generate_cdb(subcommand_args)
+    # TODO: execute clip-subcommand if it exists in the path
+    else:
+        usage()
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

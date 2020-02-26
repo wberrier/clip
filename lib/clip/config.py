@@ -1,4 +1,4 @@
-r"""Configuration Helpers for emacs project
+r"""Configuration Helpers for clip
 
 mainly to load json config file
 """
@@ -7,7 +7,7 @@ import os
 import os.path
 import json
 
-FILENAME = ".emacs_project.json"
+FILENAME = ".clip.json"
 DEBUG = False
 
 

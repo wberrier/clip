@@ -1,4 +1,4 @@
-r"""Common helpers for emacs project
+r"""Common helpers for clip
 """
 
 import os
