@@ -12,3 +12,14 @@ Maybe it's more necessary for c++ since there's a lack of standard
 tooling.  In some sense, this project is inspired by rust's cargo
 tool.
 
+# Usage
+
+```
+./clip <sub command> <sub command arguments>
+
+ Sub commands:
+
+  build [profile]
+  debug
+  generate-compile-db <directory>
+```
