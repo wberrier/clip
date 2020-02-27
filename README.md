@@ -42,6 +42,10 @@ root of a project as `.clip.json`.
             "working_dir": "build-cross"
         },
         "test": {
+            // Can set environment variables when running profiles
+            "env": {
+                "BOOST_TESTS_TO_RUN": "subset"
+            },
             "command": "ninja test",
             "working_dir": "build-debug"
         }
@@ -53,6 +57,8 @@ root of a project as `.clip.json`.
         "working_dir": "build-debug",
 
         "program_args": ""
+
+        // "env" also supported here
     },
 
     // Process compile_commands.json file[s] in various ways to
