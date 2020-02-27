@@ -98,17 +98,10 @@ def command_debug(subcommand_args):
     gdb_command = config['debug'].get('gdb', 'gdb')
     gdb_args = config['debug'].get('gdb_args', '')
 
-    command_prefix = config['debug'].get('command-prefix', '')
-
-    if len(command_prefix) != 0:
-        command_prefix = command_prefix + ' '
-
     program = config['debug']['program']
     program_args = config['debug'].get('program_args', '')
 
-    # TODO: how to get pts working?
-    command = command_prefix + '"' + gdb_command + " " + gdb_args + " -i=mi --args " + program + " " + program_args + '"'
-    # command = gdb_command + " " + gdb_args + " -i=mi --args " + program + " " + program_args
+    command = gdb_command + " " + gdb_args + " -i=mi --args " + program + " " + program_args
 
     if 'env' in config['debug']:
         env = config['debug']['env']
