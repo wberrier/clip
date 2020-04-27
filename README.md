@@ -96,6 +96,9 @@ compile_commands.json than it was to teach `cquery` to read multiple
 files.  The regex stuff was added to take compile databases from cross
 compiled builds and still run them through `cquery`.
 
+Similar support was added to start `clangd` after first generating
+compile_commands.json and then passing that directory to `clangd`.
+
 # Usage
 
 ```
@@ -106,6 +109,7 @@ compiled builds and still run them through `cquery`.
   build [profile]
   debug
   generate-compile-db <directory>
+  start-clangd <directory>
 ```
 
 # TODO

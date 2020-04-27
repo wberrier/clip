@@ -7,6 +7,7 @@ import sys
 import json
 import pprint
 import os.path
+import pathlib
 
 # Development sys.path setup
 # TODO: pythonic way to set this for development and installed tool?
@@ -188,7 +189,30 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
 
                 complete_commands_db.append(entry)
 
-    json.dump(complete_commands_db, sys.stdout)
+    json.dump(complete_commands_db, file_writer)
+
+
+def command_start_clangd(subcommand_args):
+
+    config = get_config()
+
+    working_dir = config['compile-commands'].get('working_dir', 'build')
+
+    # emacs will run this command in what it thinks the project dir is
+    project_dir = os.getcwd()
+
+    new_db_dir = working_dir + os.sep + "clip"
+    new_db_file = new_db_dir + os.sep + "compile_commands.json"
+
+    pathlib.Path(new_db_dir).mkdir(parents=True, exist_ok=True)
+
+    new_db_fd = open(new_db_file, 'w')
+    command_generate_cdb([project_dir], new_db_fd)
+    new_db_fd.close()
+
+    # Start up clangd with the appropriate arguments
+    command = "clangd -compile-commands-dir {}".format(new_db_dir)
+    return os.WEXITSTATUS(os.system(command))
 
 
 def usage():
@@ -201,6 +225,7 @@ def usage():
   build
   debug
   generate-compile-db <directory>
+  start-clangd
 
 """
     print(usage_text)
@@ -221,6 +246,8 @@ def main():
         command_debug(subcommand_args)
     elif 'generate-compile-db' == subcommand:
         command_generate_cdb(subcommand_args)
+    elif 'start-clangd' == subcommand:
+        command_start_clangd(subcommand_args)
     # TODO: execute clip-subcommand if it exists in the path
     else:
         usage()
