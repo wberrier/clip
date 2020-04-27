@@ -48,8 +48,8 @@ def get_config(config_dir=""):
         config_dir = clip.config.get_config_dir()
 
     if config_dir == "":
-        print("Unable to find " + clip.config.FILENAME)
-        return 1
+        print("Unable to find " + clip.config.FILENAME, file=sys.stderr)
+        return ""
 
     # Read config file
     return clip.config.load_json_file(config_dir + os.sep + clip.config.FILENAME)
@@ -196,22 +196,27 @@ def command_start_clangd(subcommand_args):
 
     config = get_config()
 
-    working_dir = config['compile-commands'].get('working_dir', 'build')
+    command_args = ""
 
-    # emacs will run this command in what it thinks the project dir is
-    project_dir = os.getcwd()
+    if config != "":
+        working_dir = config['compile-commands'].get('working_dir', 'build')
 
-    new_db_dir = working_dir + os.sep + "clip"
-    new_db_file = new_db_dir + os.sep + "compile_commands.json"
+        # emacs will run this command in what it thinks the project dir is
+        project_dir = os.getcwd()
 
-    pathlib.Path(new_db_dir).mkdir(parents=True, exist_ok=True)
+        new_db_dir = working_dir + os.sep + "clip"
+        new_db_file = new_db_dir + os.sep + "compile_commands.json"
 
-    new_db_fd = open(new_db_file, 'w')
-    command_generate_cdb([project_dir], new_db_fd)
-    new_db_fd.close()
+        pathlib.Path(new_db_dir).mkdir(parents=True, exist_ok=True)
+
+        new_db_fd = open(new_db_file, 'w')
+        command_generate_cdb([project_dir], new_db_fd)
+        new_db_fd.close()
+
+        command_args = "-compile-commands-dir {}".format(new_db_dir)
 
     # Start up clangd with the appropriate arguments
-    command = "clangd -compile-commands-dir {}".format(new_db_dir)
+    command = "clangd {}".format(command_args)
     return os.WEXITSTATUS(os.system(command))
 
 
