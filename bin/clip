@@ -35,7 +35,7 @@ def perform_substitutions(line, regex_map):
     """Generic function to exercise a bunch of regexes on some text"""
 
     for regex, new_text in regex_map.items():
-        line = re.sub(regex, new_text, line)
+        line = re.sub(regex, new_text, line, count=1)
 
     return line
 
