@@ -83,8 +83,6 @@ def command_build(subcommand_args):
         clip.common.set_environment(env)
 
     print("Command: " + command)
-    if DEBUG:
-        sys.exit(1)
 
     # Run command
     os.chdir(working_dir)
@@ -127,7 +125,7 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
         project_dir = subcommand_args[0]
     except IndexError:
         usage()
-        sys.exit()
+        return 0
 
     # Try to read config file
     config = get_config(project_dir)
@@ -191,6 +189,8 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
 
     json.dump(complete_commands_db, file_writer)
 
+    return 0
+
 
 def command_start_clangd(subcommand_args):
 
@@ -238,20 +238,24 @@ def main():
         subcommand_args = sys.argv[2:]
     except IndexError:
         usage()
-        sys.exit(1)
+        return 1
+
+    ret = 0
 
     if 'build' == subcommand:
-        command_build(subcommand_args)
+        ret = command_build(subcommand_args)
     elif 'debug' == subcommand:
-        command_debug(subcommand_args)
+        ret = command_debug(subcommand_args)
     elif 'generate-compile-db' == subcommand:
-        command_generate_cdb(subcommand_args)
+        ret = command_generate_cdb(subcommand_args)
     elif 'start-clangd' == subcommand:
-        command_start_clangd(subcommand_args)
+        ret = command_start_clangd(subcommand_args)
     # TODO: execute clip-subcommand if it exists in the path
     else:
         usage()
-        sys.exit(1)
+        ret = 1
+
+    return ret
 
 
 if __name__ == "__main__":
