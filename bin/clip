@@ -40,6 +40,20 @@ def perform_substitutions(line, regex_map):
     return line
 
 
+def get_config(config_dir=""):
+    """This gets repeated a lot, have a common function"""
+
+    if config_dir == "":
+        config_dir = clip.config.get_config_dir()
+
+    if config_dir == "":
+        print("Unable to find " + clip.config.FILENAME)
+        return 1
+
+    # Read config file
+    return clip.config.load_json_file(config_dir + os.sep + clip.config.FILENAME)
+
+
 def command_build(subcommand_args):
     """main"""
 
@@ -49,16 +63,11 @@ def command_build(subcommand_args):
     if len(subcommand_args) > 0:
         build_type = subcommand_args[0]
 
+    config = get_config()
     config_dir = clip.config.get_config_dir()
-
-    if config_dir == "":
-        print("Unable to find " + clip.config.FILENAME)
-        return 1
-
     num_procs = get_proc_count()
 
     # Read config file
-    config = clip.config.load_json_file(config_dir + os.sep + clip.config.FILENAME)
     if DEBUG:
         pprint.pprint(config)
 
@@ -86,12 +95,8 @@ def command_debug(subcommand_args):
 
     config_dir = clip.config.get_config_dir()
 
-    if config_dir == "":
-        print("Unable to find " + clip.config.FILENAME)
-        return 1
-
     # Read config file
-    config = clip.config.load_json_file(config_dir + os.sep + clip.config.FILENAME)
+    config = get_config()
 
     working_dir = config['debug'].get('working_dir', '.')
 
@@ -115,21 +120,16 @@ def command_debug(subcommand_args):
     return os.WEXITSTATUS(os.system(command))
 
 
-def command_generate_cdb(subcommand_args):
+def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
 
     try:
         project_dir = subcommand_args[0]
     except IndexError:
         usage()
         sys.exit()
-    config_file = project_dir + os.sep + clip.config.FILENAME
-
-    if not os.path.exists(config_file):
-        print("ERROR: unable to locate clip project config file: " + config_file)
-        sys.exit(1)
 
     # Try to read config file
-    config = clip.config.load_json_file(config_file)
+    config = get_config(project_dir)
 
     # get values (with some fallback defaults)
     working_dir = config['compile-commands'].get('working_dir', 'build')
