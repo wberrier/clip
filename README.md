@@ -108,8 +108,8 @@ compile_commands.json and then passing that directory to `clangd`.
 
   build [profile]
   debug
-  generate-compile-db <directory>
-  start-clangd <directory>
+  generate-compile-db
+  start-clangd
 ```
 
 # TODO

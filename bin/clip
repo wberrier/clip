@@ -126,14 +126,9 @@ def command_debug(subcommand_args):
 
 def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
 
-    try:
-        project_dir = subcommand_args[0]
-    except IndexError:
-        usage()
-        return 0
-
     # Try to read config file
-    config = get_config(project_dir)
+    config = get_config()
+    config_dir = clip.config.get_config_dir()
 
     # get values (with some fallback defaults)
     working_dir = config['compile-commands'].get('working_dir', 'build')
@@ -151,10 +146,14 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
 
     complete_commands_db = []
 
+    current_dir = os.getcwd()
+
+    os.chdir(config_dir)
+
     for compile_commands_file in compile_commands_files:
 
         # TODO: take a list of files and concatenate them together
-        with open(os.path.join(project_dir, working_dir, compile_commands_file)) as descriptor:
+        with open(os.path.join(config_dir, working_dir, compile_commands_file)) as descriptor:
 
             commands_db = json.load(descriptor)
 
@@ -194,6 +193,9 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
 
     json.dump(complete_commands_db, file_writer)
 
+    # Return to the original dir
+    os.chdir(current_dir)
+
     return 0
 
 
@@ -206,8 +208,9 @@ def command_start_clangd(subcommand_args):
     if config != "":
         working_dir = config['compile-commands'].get('working_dir', 'build')
 
-        # emacs will run this command in what it thinks the project dir is
-        project_dir = os.getcwd()
+        # change to the config dir, since that's what the expected paths will point to
+        config_dir = clip.config.get_config_dir()
+        os.chdir(config_dir)
 
         new_db_dir = working_dir + os.sep + "clip"
         new_db_file = new_db_dir + os.sep + "compile_commands.json"
@@ -215,13 +218,15 @@ def command_start_clangd(subcommand_args):
         pathlib.Path(new_db_dir).mkdir(parents=True, exist_ok=True)
 
         new_db_fd = open(new_db_file, 'w')
-        command_generate_cdb([project_dir], new_db_fd)
+        LOG.info("writing compilation database to: {}/{}".format(config_dir, new_db_file))
+        command_generate_cdb([], new_db_fd)
         new_db_fd.close()
 
         command_args = "-compile-commands-dir {}".format(new_db_dir)
 
     # Start up clangd with the appropriate arguments
     command = "clangd {}".format(command_args)
+    LOG.info("Starting clangd in {} with: {}".format(os.getcwd(), command))
     return os.WEXITSTATUS(os.system(command))
 
 
