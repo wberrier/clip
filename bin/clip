@@ -8,6 +8,7 @@ import json
 import pprint
 import os.path
 import pathlib
+import logging
 
 # Development sys.path setup
 # TODO: pythonic way to set this for development and installed tool?
@@ -16,7 +17,12 @@ sys.path.append(os.path.abspath(os.path.dirname(__file__) + os.sep + '../lib'))
 import clip.config
 import clip.common
 
-DEBUG = False
+# Set up some logging
+LOG = logging.getLogger('clip')
+LOG_HANDLER = logging.FileHandler(os.path.expanduser("~/.clip.log"))
+LOG_HANDLER.setFormatter(logging.Formatter("%(asctime)s: %(levelname)s: %(message)s"))
+LOG.addHandler(LOG_HANDLER)
+LOG.setLevel(logging.DEBUG)
 
 
 def get_proc_count():
@@ -48,7 +54,7 @@ def get_config(config_dir=""):
         config_dir = clip.config.get_config_dir()
 
     if config_dir == "":
-        print("Unable to find " + clip.config.FILENAME, file=sys.stderr)
+        LOG.error("Unable to find " + clip.config.FILENAME)
         return ""
 
     # Read config file
@@ -69,8 +75,7 @@ def command_build(subcommand_args):
     num_procs = get_proc_count()
 
     # Read config file
-    if DEBUG:
-        pprint.pprint(config)
+    pprint.pprint(config, stream=LOG_HANDLER.stream)
 
     # get command and replace core count
     command = config['build'][build_type]['command']
@@ -82,7 +87,7 @@ def command_build(subcommand_args):
         clip.common.print_environment(env)
         clip.common.set_environment(env)
 
-    print("Command: " + command)
+    LOG.debug("Command: " + command)
 
     # Run command
     os.chdir(working_dir)
@@ -111,8 +116,8 @@ def command_debug(subcommand_args):
         env = config['debug']['env']
         clip.common.set_environment(env)
 
-    # For debugging (can't actually print anything out or else it will mess up gdb machine interface)
-    # print("Running: " + command)
+    # For logging (careful not to print anything out or else it will mess up gdb machine interface)
+    LOG.debug("Running: " + command)
 
     # Run debug command
     os.chdir(config_dir + os.sep + working_dir)

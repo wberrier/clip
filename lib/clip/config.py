@@ -8,10 +8,9 @@ import os.path
 import json
 
 FILENAME = ".clip.json"
-DEBUG = False
 
 
-def remove_comments(text):
+def remove_comments(text, logger=None):
     """Remove comments from json string
 
     Since officially, json doesn't contain comments
@@ -22,17 +21,19 @@ def remove_comments(text):
     for line in text.split("\n"):
         if not line.lstrip().startswith("//"):
             ret += line + "\n"
-            if DEBUG:
-                print(str(count) + ":" + line)
+            if logger:
+                logger.debug(str(count) + ":" + line)
             count += 1
     return ret
 
 
-def load_json_file(json_file):
+def load_json_file(json_file, logger=None):
     """Read json file"""
 
+    if logger:
+        logger.info("Reading json file: " + json_file)
     json_text = open(json_file).read()
-    return json.loads(remove_comments(json_text))
+    return json.loads(remove_comments(json_text, logger))
 
 
 def get_config_dir():
