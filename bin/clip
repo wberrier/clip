@@ -47,6 +47,20 @@ def perform_substitutions(line, regex_map):
     return line
 
 
+def perform_array_substitutions(lines, regex_map):
+    """Generic function to exercise a bunch of regexes on some lines of text"""
+
+    new_lines = []
+
+    for line in lines:
+        new_line = line
+        for regex, new_text in regex_map.items():
+            new_line = re.sub(regex, new_text, line)
+        new_lines.append(new_line)
+
+    return new_lines
+
+
 def get_config(config_dir=""):
     """This gets repeated a lot, have a common function"""
 
@@ -125,6 +139,7 @@ def command_debug(subcommand_args):
 
 
 def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
+    """ 'Schema' found here: http://clang.llvm.org/docs/JSONCompilationDatabase.html"""
 
     # Try to read config file
     config = get_config()
@@ -138,8 +153,10 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
     # Process some filter regexes
     filter_regexes = config['compile-commands'].get('filter_regexes', {})
     directory_filter_regexes = config['compile-commands'].get('directory_filter_regexes', {})
-    command_filter_regexes = config['compile-commands'].get('command_filter_regexes', {})
     file_filter_regexes = config['compile-commands'].get('file_filter_regexes', {})
+    command_filter_regexes = config['compile-commands'].get('command_filter_regexes', {})
+    arguments_filter_regexes = config['compile-commands'].get('arguments_filter_regexes', {})
+    output_filter_regexes = config['compile-commands'].get('output_filter_regexes', {})
 
     # Default if not set in config file
     compile_commands_files = config['compile-commands'].get('files', ['compile_commands.json'])
@@ -152,7 +169,6 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
 
     for compile_commands_file in compile_commands_files:
 
-        # TODO: take a list of files and concatenate them together
         with open(os.path.join(config_dir, working_dir, compile_commands_file)) as descriptor:
 
             commands_db = json.load(descriptor)
@@ -160,16 +176,37 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
             for entry in commands_db:
 
                 # Perform all filter regexs
-                for i in ['directory', 'command', 'file']:
+                for i in ['directory', 'file']:
                     entry[i] = perform_substitutions(entry[i], filter_regexes)
 
                 entry['directory'] = perform_substitutions(entry['directory'], directory_filter_regexes)
-                entry['command'] = perform_substitutions(entry['command'], command_filter_regexes)
                 entry['file'] = perform_substitutions(entry['file'], file_filter_regexes)
 
-                command = entry['command']
+                # This field is optional
+                if 'output' in entry:
+                    entry['output'] = perform_substitutions(entry['output'], filter_regexes)
+                    entry['output'] = perform_substitutions(entry['output'], output_filter_regexes)
 
-                args = command.split()
+                # Entry must have either command or arguments
+                args = []
+                has_command = True
+                if 'command' in entry:
+                    entry['command'] = perform_substitutions(entry['command'], filter_regexes)
+                    entry['command'] = perform_substitutions(entry['command'], command_filter_regexes)
+
+                    args = entry['command'].split()
+
+                # Handle arguments separately, since it's an array
+                elif 'arguments' in entry:
+                    entry['arguments'] = perform_array_substitutions(entry['arguments'], filter_regexes)
+                    entry['arguments'] = perform_array_substitutions(entry['arguments'], arguments_filter_regexes)
+
+                    args = entry['arguments']
+                    has_command = False
+                else:
+                    LOG.error("Invalid compile_commands.json: {}".format(compile_commands_file))
+                    # TODO: better way to handle this error?
+                    sys.exit(1)
 
                 new_args = []
 
@@ -182,12 +219,13 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
                         elif arg.endswith("g++"):
                             arg = "clang++"
 
-                    if arg in ignore_args:
-                        arg = ""
+                    if arg not in ignore_args:
+                        new_args.append(arg)
 
-                    new_args.append(arg)
-
-                entry['command'] = " ".join(new_args)
+                if has_command:
+                    entry['command'] = " ".join(new_args)
+                else:
+                    entry['arguments'] = new_args
 
                 complete_commands_db.append(entry)
 

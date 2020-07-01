@@ -69,7 +69,7 @@ root of a project as `.clip.json`.
         //"override_compiler": true
 
         // Filter compile_commands.json
-        // {directory_,command_,file_}filter_regexes
+        // {directory_,command_,file_,arguments_,output_}filter_regexes
         // "filter_regexes": {
         //     "regex": "replacement"
         // }
