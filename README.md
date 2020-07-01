@@ -65,7 +65,7 @@ root of a project as `.clip.json`.
     // generate a new one to stdout
     "compile-commands": {
         "working_dir": "build-debug",
-        //"ignore_args": "args to ignore",
+        //"ignore_args": ["args to ignore"],
         //"override_compiler": true
 
         // Filter compile_commands.json

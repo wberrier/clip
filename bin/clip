@@ -148,7 +148,7 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
     # get values (with some fallback defaults)
     working_dir = config['compile-commands'].get('working_dir', 'build')
     override_compiler = config['compile-commands'].get('override_compiler', False)
-    ignore_args = config['compile-commands'].get('ignore_args', '').split()
+    ignore_args = config['compile-commands'].get('ignore_args', [''])
 
     # Process some filter regexes
     filter_regexes = config['compile-commands'].get('filter_regexes', {})
