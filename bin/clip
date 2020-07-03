@@ -237,6 +237,18 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
     return 0
 
 
+def check_common_db_dirs():
+
+    dirs = ['build-debug', 'build-cross', 'build-release', 'build', '.']
+
+    for d in dirs:
+        d_test = "{}/{}".format(d, 'compile_commands.json')
+        if os.path.exists(d_test):
+            return d
+
+    return None
+
+
 def command_start_clangd(subcommand_args):
 
     config = get_config()
@@ -261,6 +273,11 @@ def command_start_clangd(subcommand_args):
         new_db_fd.close()
 
         command_args = "-compile-commands-dir {}".format(new_db_dir)
+    else:
+        # Check for some common locations
+        db_dir = check_common_db_dirs()
+        if db_dir:
+            command_args = "-compile-commands-dir " + db_dir
 
     # Start up clangd with the appropriate arguments
     command = "clangd {}".format(command_args)
