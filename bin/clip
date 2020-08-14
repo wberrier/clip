@@ -280,7 +280,7 @@ def command_start_clangd(subcommand_args):
             command_args = "-compile-commands-dir " + db_dir
 
     # Start up clangd with the appropriate arguments
-    command = "clangd {}".format(command_args)
+    command = "clangd --log=info {}".format(command_args)
     LOG.info("Starting clangd in {} with: {}".format(os.getcwd(), command))
     return os.WEXITSTATUS(os.system(command))
 
