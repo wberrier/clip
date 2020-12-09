@@ -229,7 +229,8 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
 
                 complete_commands_db.append(entry)
 
-    json.dump(complete_commands_db, file_writer)
+    # Indent with 2 spaces (helps look at the output)
+    json.dump(complete_commands_db, file_writer, indent=2)
 
     # Return to the original dir
     os.chdir(current_dir)
