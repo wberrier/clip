@@ -55,7 +55,7 @@ def perform_array_substitutions(lines, regex_map):
     for line in lines:
         new_line = line
         for regex, new_text in regex_map.items():
-            new_line = re.sub(regex, new_text, line)
+            new_line = re.sub(regex, new_text, new_line)
         new_lines.append(new_line)
 
     return new_lines
