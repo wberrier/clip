@@ -256,6 +256,8 @@ def command_start_clangd(subcommand_args):
 
     command_args = ""
 
+    clangd_log_level = "info"
+
     if config != "":
         working_dir = config['compile-commands'].get('working_dir', 'build')
 
@@ -273,15 +275,23 @@ def command_start_clangd(subcommand_args):
         command_generate_cdb([], new_db_fd)
         new_db_fd.close()
 
-        command_args = "-compile-commands-dir {}".format(new_db_dir)
+        command_args = "--compile-commands-dir {}".format(new_db_dir)
+
+        clangd_flags = config['compile-commands'].get('clangd_flags', {})
+
+        if 'log_level' in clangd_flags:
+            clangd_log_level = clangd_flags['log_level']
+        if 'query_driver' in clangd_flags:
+            command_args = command_args + " --query-driver=" + clangd_flags['query_driver']
+
     else:
         # Check for some common locations
         db_dir = check_common_db_dirs()
         if db_dir:
-            command_args = "-compile-commands-dir " + db_dir
+            command_args = "--compile-commands-dir " + db_dir
 
     # Start up clangd with the appropriate arguments
-    command = "clangd --log=info {}".format(command_args)
+    command = "clangd --log={} {}".format(clangd_log_level, command_args)
     LOG.info("Starting clangd in {} with: {}".format(os.getcwd(), command))
     return os.WEXITSTATUS(os.system(command))
 

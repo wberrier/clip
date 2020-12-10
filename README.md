@@ -78,7 +78,13 @@ root of a project as `.clip.json`.
         "files": [
             "compile_commands.json",
             "compile_commands2.json"
-        ]
+        ],
+
+        // Some options to pass to clangd
+        "clangd_flags": {
+            "log_level": "verbose",
+            "query_driver": " /usr/bin/**/clang-*"
+        },
 
     }
 }
