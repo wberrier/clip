@@ -147,7 +147,7 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
 
     # get values (with some fallback defaults)
     working_dir = config['compile-commands'].get('working_dir', 'build')
-    override_compiler = config['compile-commands'].get('override_compiler', False)
+    compiler_overrides = config['compile-commands'].get('compiler_overrides', {})
     ignore_args = config['compile-commands'].get('ignore_args', [''])
 
     # Process some filter regexes
@@ -213,11 +213,9 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
                 # Sanitize compile_commands.json
                 for arg in args:
 
-                    if override_compiler:
-                        if arg.endswith("gcc"):
-                            arg = "clang"
-                        elif arg.endswith("g++"):
-                            arg = "clang++"
+                    for ends_with, replacement in compiler_overrides.items():
+                        if arg.endswith(ends_with):
+                            arg = replacement
 
                     if arg not in ignore_args:
                         new_args.append(arg)

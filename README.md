@@ -66,7 +66,12 @@ root of a project as `.clip.json`.
     "compile-commands": {
         "working_dir": "build-debug",
         //"ignore_args": ["args to ignore"],
-        //"override_compiler": true
+
+        // Option to override compilers
+        "compiler_overrides": {
+            "gcc": "/usr/local/bin/my-special-gcc",
+            "g++": "/usr/local/bin/my-special-g++"
+        },
 
         // Filter compile_commands.json
         // {directory_,command_,file_,arguments_,output_}filter_regexes
@@ -83,7 +88,7 @@ root of a project as `.clip.json`.
         // Some options to pass to clangd
         "clangd_flags": {
             "log_level": "verbose",
-            "query_driver": " /usr/bin/**/clang-*"
+            "query_driver": "/usr/bin/**/clang-*"
         },
 
     }
