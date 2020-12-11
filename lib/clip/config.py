@@ -27,12 +27,16 @@ def remove_comments(text, logger=None):
     return ret
 
 
-def load_json_file(json_file, logger=None):
+def load_json_file(json_file, logger=None, replacements={}):
     """Read json file"""
 
     if logger:
         logger.info("Reading json file: " + json_file)
     json_text = open(json_file).read()
+
+    for key, value in replacements.items():
+        json_text = json_text.replace(key, value)
+
     return json.loads(remove_comments(json_text, logger))
 
 

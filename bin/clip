@@ -72,8 +72,16 @@ def get_config(config_dir=""):
         LOG.error("Unable to find " + clip.config.FILENAME)
         return ""
 
+    # Generic mechanism to perform some replacements on the file
+    replacements = {
+        # Allow not hard coding in config to clip root dir
+        "@CLIP_ROOT_DIR@": clip.config.get_config_dir(),
+        # replace core count
+        "@NUM_CORES_TO_USE@": str(get_proc_count()),
+    }
+
     # Read config file
-    return clip.config.load_json_file(config_dir + os.sep + clip.config.FILENAME)
+    return clip.config.load_json_file(config_dir + os.sep + clip.config.FILENAME, replacements=replacements)
 
 
 def command_build(subcommand_args):
@@ -87,15 +95,13 @@ def command_build(subcommand_args):
 
     config = get_config()
     config_dir = clip.config.get_config_dir()
-    num_procs = get_proc_count()
 
     # Read config file
     pprint.pprint(config, stream=LOG_HANDLER.stream)
 
-    # get command and replace core count
+    # get command
     command = config['build'][build_type]['command']
     working_dir = config_dir + os.path.sep + config['build'][build_type].get('working_dir', '.')
-    command = command.replace("@NUM_CORES_TO_USE@", str(num_procs))
 
     if 'env' in config['build'][build_type]:
         env = config['build'][build_type]['env']
