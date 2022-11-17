@@ -20,79 +20,63 @@ be persisted with the source.
 
 # Config File
 
-Here's a sample configuration file using meson/ninja (apologies for
-the comments, `clip` strips those out).  This would be placed at the
-root of a project as `.clip.json`.
+Here's a sample configuration file using meson/ninja.  This would be
+placed at the root of a project as `.clip.yaml`.
 
-```json
-{
-    // parameters that will build this project
-    "build": {
-        // Various "profiles"
-        "release": {
-            "command": "ninja -j@NUM_CORES_TO_USE@'",
-            "working_dir": "build"
-        },
-        "debug": {
-            "command": "ninja -j@NUM_CORES_TO_USE@'",
-            "working_dir": "build-debug"
-        },
-        "cross": {
-            "command": "ninja -j@NUM_CORES_TO_USE@'",
-            "working_dir": "build-cross"
-        },
-        "test": {
-            // Can set environment variables when running profiles
-            "env": {
-                "BOOST_TESTS_TO_RUN": "subset"
-            },
-            "command": "ninja test",
-            "working_dir": "build-debug"
-        }
-    },
+```yaml
+---
+# parameters that will build this project
+build:
+  # Various "profiles"
+  release:
+    command: ninja -j@NUM_CORES_TO_USE@
+    working_dir: build
+  debug:
+    command: ninja -j@NUM_CORES_TO_USE@
+    working_dir: build-debug
+  cross:
+    command: ninja -j@NUM_CORES_TO_USE@
+    working_dir: build-cross
+  test:
+    # Can set environment variables when running profiles
+    env:
+      BOOST_TESTS_TO_RUN: subset
+    command: ninja test
+    working_dir: build-debug
 
-    // run the "tests" binary with gdb in the "build-debug" directory
-    "debug": {
-        "program": "tests",
-        "working_dir": "build-debug",
+# run the "tests" binary with gdb in the "build-debug" directory
+debug:
+  program: tests
+  working_dir: build-debug
+  program_args:
+  # "env" also supported here
 
-        "program_args": ""
+# Process compile_commands.json file[s] in various ways to
+# generate a new one to stdout
+compile-commands:
+  working_dir: build-debug
+  # ignore_args:
+  #   - args to ignore
 
-        // "env" also supported here
-    },
+  # Option to override compilers
+  compiler_overrides:
+    gcc: /usr/local/bin/my-special-gcc
+    g++: /usr/local/bin/my-special-g++
 
-    // Process compile_commands.json file[s] in various ways to
-    // generate a new one to stdout
-    "compile-commands": {
-        "working_dir": "build-debug",
-        //"ignore_args": ["args to ignore"],
+  # Filter compile_commands.json
+  # {directory_,command_,file_,arguments_,output_}filter_regexes
+  # filter_regexes:
+  #   regex: replacement
 
-        // Option to override compilers
-        "compiler_overrides": {
-            "gcc": "/usr/local/bin/my-special-gcc",
-            "g++": "/usr/local/bin/my-special-g++"
-        },
+  # You can specify more than one file that will get merged into one
+  files:
+    - compile_commands.json
+    - compile_commands2.json
 
-        // Filter compile_commands.json
-        // {directory_,command_,file_,arguments_,output_}filter_regexes
-        // "filter_regexes": {
-        //     "regex": "replacement"
-        // }
-
-        // You can specify more than one file that will get merged into one
-        "files": [
-            "compile_commands.json",
-            "compile_commands2.json"
-        ],
-
-        // Some options to pass to clangd
-        "clangd_flags": {
-            "log_level": "verbose",
-            "query_driver": "/usr/bin/**/clang-*"
-        },
-
-    }
-}
+  # Some options to pass to clangd
+  clangd_flags:
+    log_level: verbose
+    query_driver: /usr/bin/**/clang-*
 ```
 
 `NUM_CORES_TO_USE` is referenced from the environment in order to cap
@@ -127,7 +111,7 @@ compile_commands.json and then passing that directory to `clangd`.
 
 * `clip build --target=profile` instead of `clip build profile`
 * tests?
-* more flexible json schema for handling debugging targets and tests
+* more flexible yaml schema for handling debugging targets and tests
 * better schema?
 * give this script some python "love"
   * setup.py?

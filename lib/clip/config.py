@@ -1,43 +1,26 @@
 r"""Configuration Helpers for clip
 
-mainly to load json config file
+mainly to load config file
 """
 
 import os
 import os.path
-import json
+import yaml
 
-FILENAME = ".clip.json"
-
-
-def remove_comments(text, logger=None):
-    """Remove comments from json string
-
-    Since officially, json doesn't contain comments
-    """
-
-    ret = ""
-    count = 0
-    for line in text.split("\n"):
-        if not line.lstrip().startswith("//"):
-            ret += line + "\n"
-            if logger:
-                logger.debug(str(count) + ":" + line)
-            count += 1
-    return ret
+FILENAME = ".clip.yaml"
 
 
-def load_json_file(json_file, logger=None, replacements={}):
-    """Read json file"""
+def load_file(config_file, logger=None, replacements={}):
+    """Read config file"""
 
     if logger:
-        logger.info("Reading json file: " + json_file)
-    json_text = open(json_file).read()
+        logger.info("Reading config file: " + config_file)
+    config_text = open(config_file).read()
 
     for key, value in replacements.items():
-        json_text = json_text.replace(key, value)
+        config_text = config_text.replace(key, value)
 
-    return json.loads(remove_comments(json_text, logger))
+    return yaml.safe_load(config_text)
 
 
 def get_config_dir():
