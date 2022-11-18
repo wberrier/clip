@@ -53,7 +53,7 @@ debug:
 
 # Process compile_commands.json file[s] in various ways to
 # generate a new one to stdout
-compile-commands:
+compile_commands:
   working_dir: build-debug
   # ignore_args:
   #   - args to ignore

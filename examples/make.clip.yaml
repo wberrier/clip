@@ -1,6 +1,6 @@
 ---
 # Can generate with compile_commands.json with "bear"
-compile-commands:
+compile_commands:
   working_dir: .
 
 # No difference between release and debug for now

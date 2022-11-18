@@ -153,20 +153,20 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
     config_dir = clip.config.get_config_dir()
 
     # get values (with some fallback defaults)
-    working_dir = config['compile-commands'].get('working_dir', 'build')
-    compiler_overrides = config['compile-commands'].get('compiler_overrides', {})
-    ignore_args = config['compile-commands'].get('ignore_args', [''])
+    working_dir = config['compile_commands'].get('working_dir', 'build')
+    compiler_overrides = config['compile_commands'].get('compiler_overrides', {})
+    ignore_args = config['compile_commands'].get('ignore_args', [''])
 
     # Process some filter regexes
-    filter_regexes = config['compile-commands'].get('filter_regexes', {})
-    directory_filter_regexes = config['compile-commands'].get('directory_filter_regexes', {})
-    file_filter_regexes = config['compile-commands'].get('file_filter_regexes', {})
-    command_filter_regexes = config['compile-commands'].get('command_filter_regexes', {})
-    arguments_filter_regexes = config['compile-commands'].get('arguments_filter_regexes', {})
-    output_filter_regexes = config['compile-commands'].get('output_filter_regexes', {})
+    filter_regexes = config['compile_commands'].get('filter_regexes', {})
+    directory_filter_regexes = config['compile_commands'].get('directory_filter_regexes', {})
+    file_filter_regexes = config['compile_commands'].get('file_filter_regexes', {})
+    command_filter_regexes = config['compile_commands'].get('command_filter_regexes', {})
+    arguments_filter_regexes = config['compile_commands'].get('arguments_filter_regexes', {})
+    output_filter_regexes = config['compile_commands'].get('output_filter_regexes', {})
 
     # Default if not set in config file
-    compile_commands_files = config['compile-commands'].get('files', ['compile_commands.json'])
+    compile_commands_files = config['compile_commands'].get('files', ['compile_commands.json'])
 
     complete_commands_db = []
 
@@ -272,7 +272,7 @@ def command_start_clangd(subcommand_args):
     clangd_log_level = "info"
 
     if config != "":
-        working_dir = config['compile-commands'].get('working_dir', 'build')
+        working_dir = config['compile_commands'].get('working_dir', 'build')
 
         # change to the config dir, since that's what the expected paths will point to
         config_dir = clip.config.get_config_dir()
@@ -290,7 +290,7 @@ def command_start_clangd(subcommand_args):
 
         command_args = "--compile-commands-dir {}".format(new_db_dir)
 
-        clangd_flags = config['compile-commands'].get('clangd_flags', {})
+        clangd_flags = config['compile_commands'].get('clangd_flags', {})
 
         if 'log_level' in clangd_flags:
             clangd_log_level = clangd_flags['log_level']

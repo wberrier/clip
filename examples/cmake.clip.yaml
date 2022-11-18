@@ -1,5 +1,5 @@
 ---
-compile-commands:
+compile_commands:
   working_dir: build
 
 # No difference between release and debug for now
