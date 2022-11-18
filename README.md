@@ -110,6 +110,7 @@ compile_commands.json and then passing that directory to `clangd`.
 # TODO
 
 * `clip build --target=profile` instead of `clip build profile`
+* Make "Config" object to handle loading, munging, and accessing
 * tests?
 * more flexible yaml schema for handling debugging targets and tests
 * better schema?
