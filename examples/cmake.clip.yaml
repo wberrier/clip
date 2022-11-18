@@ -1,0 +1,9 @@
+---
+compile-commands:
+  working_dir: build
+
+# No difference between release and debug for now
+build:
+  release:
+    working_dir: build
+    command: make -j@NUM_CORES_TO_USE@
