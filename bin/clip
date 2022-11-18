@@ -81,7 +81,7 @@ def get_config(config_dir=""):
     }
 
     # Read config file
-    return clip.config.load_file(config_dir + os.sep + clip.config.FILENAME, replacements=replacements)
+    return clip.config.load_file(config_dir + os.sep + clip.config.FILENAME, replacements=replacements, logger=LOG)
 
 
 def command_build(subcommand_args):
