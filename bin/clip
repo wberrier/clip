@@ -274,8 +274,12 @@ def find_executable(choices):
 def command_start_clangd(subcommand_args):
 
     config = get_config()
+    clangd_config = config['compile_commands'].get('clangd', {})
 
     command_args = ""
+    # TODO: when did clangd start "getting good"?
+    # clangd-8 (default in debian 10) sure doesn't work well...
+    clangd_executable = clangd_config.get('executable', find_executable(['clangd-11', 'clangd']))
 
     clangd_log_level = "info"
 
@@ -298,12 +302,14 @@ def command_start_clangd(subcommand_args):
 
         command_args = "--compile-commands-dir {}".format(new_db_dir)
 
-        clangd_flags = config['compile_commands'].get('clangd_flags', {})
+        if 'log_level' in clangd_config:
+            clangd_log_level = clangd_config['log_level']
+        if 'query_driver' in clangd_config:
+            command_args = command_args + " --query-driver=" + clangd_config['query_driver']
 
-        if 'log_level' in clangd_flags:
-            clangd_log_level = clangd_flags['log_level']
-        if 'query_driver' in clangd_flags:
-            command_args = command_args + " --query-driver=" + clangd_flags['query_driver']
+        # Add any additional specified flags
+        if 'extra_args' in clangd_config:
+            command_args = command_args + " " + clangd_config['extra_args']
 
     else:
         # Check for some common locations
@@ -311,16 +317,12 @@ def command_start_clangd(subcommand_args):
         if db_dir:
             command_args = "--compile-commands-dir " + db_dir
 
-    # TODO: when did clangd start "getting good"?
-    # clangd-8 (default in debian 10) sure doesn't work well...
-    clangd_binary = find_executable(['clangd-11', 'clangd'])
-
-    if clangd_binary is None:
+    if clangd_executable is None:
         LOG.error("Unable to find clangd")
         sys.exit(1)
 
     # Start up clangd with the appropriate arguments
-    command = "{} --log={} {}".format(clangd_binary, clangd_log_level, command_args)
+    command = "{} --log={} {}".format(clangd_executable, clangd_log_level, command_args)
     LOG.info("Starting clangd in {} with: {}".format(os.getcwd(), command))
     return os.WEXITSTATUS(os.system(command))
 

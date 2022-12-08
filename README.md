@@ -77,9 +77,11 @@ compile_commands:
     - compile_commands2.json
 
   # Some options to pass to clangd
-  clangd_flags:
+  clangd:
     log_level: verbose
     query_driver: /usr/bin/**/clang-*
+    #extra_args: --pretty
+    #executable: /usr/local/bin/clangd
 ```
 
 `NUM_CORES_TO_USE` is referenced from the environment in order to cap
