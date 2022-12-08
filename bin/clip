@@ -158,6 +158,7 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
     working_dir = config['compile_commands'].get('working_dir', 'build')
     compiler_overrides = config['compile_commands'].get('compiler_overrides', {})
     ignore_args = config['compile_commands'].get('ignore_args', [''])
+    additional_args = config['compile_commands'].get('additional_args', [''])
 
     # Process some filter regexes
     filter_regexes = config['compile_commands'].get('filter_regexes', {})
@@ -227,6 +228,11 @@ def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
                             arg = replacement
 
                     if arg not in ignore_args:
+                        new_args.append(arg)
+
+                # Add additional arguments if not there
+                for arg in additional_args:
+                    if arg not in new_args:
                         new_args.append(arg)
 
                 if has_command:

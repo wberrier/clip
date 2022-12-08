@@ -58,6 +58,9 @@ compile_commands:
   # ignore_args:
   #   - args to ignore
 
+  # additional_args:
+  #   - args to add if missing
+
   # Option to override compilers
   compiler_overrides:
     gcc: /usr/local/bin/my-special-gcc
