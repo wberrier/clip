@@ -10,6 +10,7 @@ import shutil
 import os.path
 import pathlib
 import logging
+import subprocess
 
 # Development sys.path setup
 # TODO: pythonic way to set this for development and installed tool?
@@ -142,7 +143,8 @@ def command_debug(subcommand_args):
 
     # Run debug command
     os.chdir(config_dir + os.sep + working_dir)
-    return os.WEXITSTATUS(os.system(command))
+    (status, output) = subprocess.getstatusoutput(command)
+    return output
 
 
 def command_generate_cdb(subcommand_args, file_writer=sys.stdout):
