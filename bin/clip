@@ -274,7 +274,9 @@ def find_executable(choices):
 def command_start_clangd(subcommand_args):
 
     config = get_config()
-    clangd_config = config['compile_commands'].get('clangd', {})
+    clangd_config = {}
+    if 'compile_commands' in config:
+        clangd_config = config['compile_commands'].get('clangd', {})
 
     command_args = ""
     # TODO: when did clangd start "getting good"?
